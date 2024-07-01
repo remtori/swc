@@ -36,9 +36,9 @@ mod sticky_regex;
 pub mod template_literal;
 mod typeof_symbol;
 
-fn exprs(unresolved_mark: Mark) -> impl Fold {
+fn exprs(unresolved_mark: Mark, is_moz_js_33: bool) -> impl Fold {
     chain!(
-        arrow(unresolved_mark),
+        Optional::new(arrow(unresolved_mark), !is_moz_js_33),
         duplicate_keys(),
         sticky_regex(),
         instance_of(),
@@ -70,7 +70,7 @@ where
             unicode_regex: true,
             unicode_sets_regex: false,
         }),
-        block_scoped_functions(),
+        Optional::new(block_scoped_functions(), !c.is_moz_js_33),
         template_literal(c.template_literal),
         classes(c.classes),
         new_target(),
@@ -83,17 +83,22 @@ where
         // Should come before parameters
         // See: https://github.com/swc-project/swc/issues/1036
         parameters(c.parameters, unresolved_mark),
-        exprs(unresolved_mark),
+        exprs(unresolved_mark, c.is_moz_js_33),
         computed_properties(c.computed_props),
         destructuring(c.destructuring),
         block_scoping(unresolved_mark),
-        generator::generator(unresolved_mark, comments),
+        Optional::new(
+            generator::generator(unresolved_mark, comments),
+            !c.is_moz_js_33
+        ),
     )
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
+    pub is_moz_js_33: bool,
+
     #[serde(default)]
     pub classes: classes::Config,
 

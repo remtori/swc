@@ -281,6 +281,7 @@ impl<'a, 'b, P: swc_ecma_visit::Fold> PassBuilder<'a, 'b, P> {
                         self.unresolved_mark,
                         comments,
                         compat::es2015::Config {
+                            is_moz_js_33: true,
                             classes: compat::es2015::classes::Config {
                                 constant_super: assumptions.constant_super,
                                 no_class_calls: assumptions.no_class_calls,

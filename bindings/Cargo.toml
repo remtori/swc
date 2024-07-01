@@ -64,3 +64,6 @@ strip = "symbols"
 
 [profile.dev.package."*"]
 debug-assertions = false
+
+[patch.crates-io]
+swc_core = { git = 'https://github.com/remtori/swc.git' }
